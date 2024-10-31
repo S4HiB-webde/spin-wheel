@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spin Wheel</title>
+  <style>
+    /* Basic CSS for wheel */
+    #wheel {
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      border: 10px solid #333;
+      position: relative;
+    }
+    .segment {
+      position: absolute;
+      width: 50%;
+      height: 50%;
+      background: #f1c40f;
+      transform-origin: 100% 100%;
+    }
+  </style>
+</head>
+<body>
+  <div id="wheel">
+    <!-- Wheel segments go here (e.g., using a library or canvas for segments) -->
+  </div>
+  <button id="spinBtn">Spin</button>
+  <script>
+    // JavaScript for rotating the wheel
+    const wheel = document.getElementById("wheel");
+    const spinBtn = document.getElementById("spinBtn");
+    let spinning = false;
+
+    spinBtn.addEventListener("click", () => {
+      if (spinning) return;
+      spinning = true;
+
+      // Randomly generate a rotation angle
+      const angle = Math.floor(Math.random() * 3600) + 360;
+      wheel.style.transition = "transform 4s ease-out";
+      wheel.style.transform = `rotate(${angle}deg)`;
+
+      setTimeout(() => {
+        spinning = false;
+        const result = determineReward(angle % 360);
+        alert(`You won: ${result}`);
+        window.ReactNativeWebView.postMessage(result); // Send result to Adalo
+      }, 4000);
+    });
+
+    function determineReward(angle) {
+      // Assign rewards based on angle range (e.g., 0-60 deg = "100 Coins")
+      if (angle >= 0 && angle < 60) return "100 Coins";
+      else if (angle >= 60 && angle < 120) return "200 Coins";
+      // Add other conditions as needed
+      else return "Try Again";
+    }
+  </script>
+</body>
+</html>

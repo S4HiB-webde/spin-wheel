@@ -5,13 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spin Wheel</title>
   <style>
-    /* Basic CSS for wheel */
+    /* Basic styling for the wheel and button */
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+    }
     #wheel {
       width: 300px;
       height: 300px;
       border-radius: 50%;
       border: 10px solid #333;
       position: relative;
+      overflow: hidden;
     }
     .segment {
       position: absolute;
@@ -19,16 +30,39 @@
       height: 50%;
       background: #f1c40f;
       transform-origin: 100% 100%;
+      clip-path: polygon(0 0, 100% 0, 0% 100%);
+    }
+    #spinBtn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #spinBtn:disabled {
+      background-color: #95a5a6;
+      cursor: not-allowed;
     }
   </style>
 </head>
 <body>
   <div id="wheel">
-    <!-- Wheel segments go here (e.g., using a library or canvas for segments) -->
+    <div class="segment" style="transform: rotate(0deg); background-color: #e74c3c;">100 Coins</div>
+    <div class="segment" style="transform: rotate(45deg); background-color: #3498db;">20 Coins</div>
+    <div class="segment" style="transform: rotate(90deg); background-color: #f1c40f;">Try Again</div>
+    <div class="segment" style="transform: rotate(135deg); background-color: #9b59b6;">Mystery Box</div>
+    <div class="segment" style="transform: rotate(180deg); background-color: #e67e22;">30 Coins</div>
+    <div class="segment" style="transform: rotate(225deg); background-color: #2ecc71;">5 Coins</div>
+    <div class="segment" style="transform: rotate(270deg); background-color: #1abc9c;">10 Coins</div>
+    <div class="segment" style="transform: rotate(315deg); background-color: #34495e;">No Prize</div>
   </div>
   <button id="spinBtn">Spin</button>
+
   <script>
-    // JavaScript for rotating the wheel
+    // JavaScript for rotating the wheel and determining prize
     const wheel = document.getElementById("wheel");
     const spinBtn = document.getElementById("spinBtn");
     let spinning = false;
@@ -36,26 +70,37 @@
     spinBtn.addEventListener("click", () => {
       if (spinning) return;
       spinning = true;
+      spinBtn.disabled = true;
 
-      // Randomly generate a rotation angle
+      // Random rotation angle (multiple of 360 for more rotations)
       const angle = Math.floor(Math.random() * 3600) + 360;
       wheel.style.transition = "transform 4s ease-out";
       wheel.style.transform = `rotate(${angle}deg)`;
 
       setTimeout(() => {
         spinning = false;
-        const result = determineReward(angle % 360);
+        spinBtn.disabled = false;
+        const finalAngle = angle % 360;
+        const result = determineReward(finalAngle);
         alert(`You won: ${result}`);
-        window.ReactNativeWebView.postMessage(result); // Send result to Adalo
+
+        // Send result to Adalo using WebView postMessage (if embedded in Adalo)
+        if (window.ReactNativeWebView) {
+          window.ReactNativeWebView.postMessage(result);
+        }
       }, 4000);
     });
 
+    // Determine reward based on angle
     function determineReward(angle) {
-      // Assign rewards based on angle range (e.g., 0-60 deg = "100 Coins")
-      if (angle >= 0 && angle < 60) return "100 Coins";
-      else if (angle >= 60 && angle < 120) return "200 Coins";
-      // Add other conditions as needed
-      else return "Try Again";
+      if (angle >= 0 && angle < 45) return "100 Coins";
+      else if (angle >= 45 && angle < 90) return "20 Coins";
+      else if (angle >= 90 && angle < 135) return "Try Again";
+      else if (angle >= 135 && angle < 180) return "Mystery Box";
+      else if (angle >= 180 && angle < 225) return "30 Coins";
+      else if (angle >= 225 && angle < 270) return "5 Coins";
+      else if (angle >= 270 && angle < 315) return "10 Coins";
+      else return "No Prize";
     }
   </script>
 </body>
